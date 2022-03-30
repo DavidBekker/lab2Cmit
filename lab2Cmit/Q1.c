@@ -5,7 +5,8 @@
 #include <assert.h>
 #define NUM_Year '0'
 #define Char_Year '1'
-
+#define LOWYEAR 1950
+#define HIGHYEAR 2050
 
 typedef struct
 {
@@ -16,7 +17,7 @@ typedef struct
 	union FirstYearOfWork
 	{
 		unsigned  StartYearsHL;
-		char Hys;
+		char Hys[7];
 	}StartWork;
 }
 Worker;
@@ -36,6 +37,7 @@ WorkerList* deleteWorstWorker(WorkerList* head);//פונקציה המוחקת א
 void UpdateWorker(WorkerList* head, float percent);//העלאת שכר באחוזים
 WorkerList* reverse(WorkerList* head);//הופכת את הרשימה
 void FreeWorkers(WorkerList* head);//משחררת מהזכרון את המשתנחם
+void PrintList(WorkerList* head);
 void main()
 {
 	WorkerList* head = NULL; //רשימה ריקה
@@ -48,7 +50,7 @@ void main()
 	while (1)
 	{
 		printf(" \n to Create Worker enter  'C' ,\n \
-to Print Worker enter 'P'\n, to update prcent to all Worker enter 'H' ,\n   to find Worker enter 'F' ,\n\
+to Print Worker enter 'P'\n, to ListPrint Worker enter 'LP'\n, to update prcent to all Worker enter 'H' ,\n   to find Worker enter 'F' ,\n\
  to delete worst Worker enter 'D' ,\n to swap the order list enter 'S' ,\n to delet ALL eWorker  enter 'L'\n to exit  menu enter 'X'\n");
 		fseek(stdin, 0, SEEK_END);
 		scanf("%c", &yuserSelt);
@@ -57,7 +59,6 @@ to Print Worker enter 'P'\n, to update prcent to all Worker enter 'H' ,\n   to f
 		case 'C': //יצירת כרטיסית עובד 
 		{
 			printf("to create worker, please select a type  of year 0 - for Numbers, 1 - Hebrew:\n");
-
 			do
 			{
 					scanf("%c", &typeyear);
@@ -66,33 +67,47 @@ to Print Worker enter 'P'\n, to update prcent to all Worker enter 'H' ,\n   to f
 					printf("tRY AGAIN\n");
 
 			} while (typeyear != '0' && typeyear != '1'); //קולט סוג שנה ליצירת עובד
-
 			worker = CreateWorker(typeyear);
-			//	PrintWorker(typeyear, worker);
 			head = addWorker(head, worker);
-			break;
+			break;		
 
 		}
 		case'P'://הדפסת כרטיסית עובד
 		{
+			if (!head)
+			{
+				printf("Empty list");
+				exit(0);
+			}
+				
+
 			printf("select id of worker For print Location ");
 			scanf("%lu", &idP); //מחזיר מיקום שנקלט
 			place = index(head, idP);
-			WorkerList* temp = head;
-			for (i = 0; i < place; i++)
+			WorkerList* curr = head;
+			WorkerList* ptr = NULL;
+
+			while (curr != NULL&& idP!=curr->data->id )
 			{
-
-				temp = temp->next;
+				ptr = curr;
+				curr = curr->next;
+				
 			}
-			PrintWorker('1', head->data);
+			if (LOWYEAR < &(curr->data->StartWork) && &(curr->data->StartWork) < HIGHYEAR)
+				PrintWorker('0', curr->data);
+			else
+				PrintWorker('1', curr->data);
 
-			PrintWorker(1, head->data);
-			PrintWorker(0, worker);
+			break;
+		}
+		case'LP':
+		{
+			PrintList(head);
 			break;
 		}
 		case 'H':
 		{
-			printf("how many percent you want to add?");
+			printf("how many percent you want to add?\n");
 			scanf("%f", &percent);
 			UpdateWorker(head, percent);
 			break;
@@ -106,7 +121,9 @@ to Print Worker enter 'P'\n, to update prcent to all Worker enter 'H' ,\n   to f
 		}
 		case 'D':
 		{
-			head = deleteWorstWorker(head);
+			head = deleteWorstWorker(head); //פלט מחיקת עובד עני*
+			printf("show update list, \n");
+
 			break;
 		}
 		case 'S':
@@ -171,21 +188,18 @@ Worker* CreateWorker(char type)
 	switch (type)
 	{
 	case Char_Year:
-		do
-		{
 			fseek(stdin, 0, SEEK_END);
 			printf("\nYear Start Workig in Hebrew : ");
-			scanf("%c", &(Wnew->StartWork.Hys));
-			if ((Wnew->StartWork.Hys < 38) || (Wnew->StartWork.Hys > 90))puts("Value Shoulde be  in hebrew only");
-		} while ((Wnew->StartWork.Hys < 38) || (Wnew->StartWork.Hys >= 90));
-		break;
+			gets_s(Wnew->StartWork.Hys,6);
+			break;
 	case NUM_Year:
 		do {
 			printf("\nYear Start Workig Num : ");
 			scanf("%d", &Wnew->StartWork.StartYearsHL);
-			if ((Wnew->StartWork.StartYearsHL >= 9999) || (Wnew->StartWork.StartYearsHL < 0))puts("Value shoulde be Right numbesr\n");
+			if ((Wnew->StartWork.StartYearsHL >= HIGHYEAR) || 
+				         (Wnew->StartWork.StartYearsHL < LOWYEAR))puts("Value shoulde be Right numbesr\n");
 
-		} while ((Wnew->StartWork.StartYearsHL > 9999) || (Wnew->StartWork.StartYearsHL < 0));
+		} while ((Wnew->StartWork.StartYearsHL > HIGHYEAR) || (Wnew->StartWork.StartYearsHL < LOWYEAR));
 		break;
 	}
 	return Wnew;
@@ -210,49 +224,25 @@ WorkerList* addWorker(WorkerList* head, Worker* Wp) //מחזיר את ראש ה�
 		curr = curr->next;
 	}
 	newWorkerlist->next = curr;
-	ptr->next = newWorkerlist;
-	
-	//if (ptr) ptr->next = newWorkerlist;
-	//else head = newWorkerlist;
+	ptr->next = newWorkerlist;	
 	return head;
-
-	//if ((x->data->payment) <= (newWorkerlist->data->payment))
-	//{
-	//	newWorkerlist->next = x;//check
-	//	x = newWorkerlist;//check
-	//}
-	//else
-	//{
-
-	//	for (x = head; x->next != NULL; x = x->next)//check while(x->next==NULL)
-	//	{
-
-	//		if ((x->data->payment) <= (newWorkerlist->data->payment) || ((newWorkerlist->data->payment) < (x->next->data->payment)))//check
-	//		{
-	//			x->next = newWorkerlist;
-	//			exit;
-	//		}
-
-	//	}
-	//}
-	//if (x->next == NULL)//האם הגענו לסוף הרשימה לפני הכנסת העובד החדש
-	//{
-	//	newWorkerlist->next = NULL;
-	//	x->next = newWorkerlist;//הכי עשיר
-
-	//}
-
 
 }
 int index(WorkerList* head, long unsigned id)
 {
+	int count = -1;
 	WorkerList* x = head;
+	if (x == NULL)
+		return count;
 	for (x = head; x->next != NULL; x = x->next)
 	{
 		if (x->data->id == id)
-			return x;
+		{
+			count++;
+			return count;
+		}
+
 	}
-	return -1;
 }
 int indexR(WorkerList* head, long unsigned id)
 {
@@ -280,10 +270,13 @@ WorkerList* deleteWorstWorker(WorkerList* head)//מוחק איבר מתחילת 
 void UpdateWorker(WorkerList* head, float percent)
 {
 	WorkerList* x = head;
-	if (x->next != NULL)
-		UpdateWorker(x->next, percent);
-	x->data->payment = ((x->data->payment) + (x->data->payment) * percent);
-
+	if (head == NULL)
+		return 0;
+	while (x != NULL)
+	{
+		x->data->payment = x->data->payment +x->data->payment * percent;
+		x = x->next;
+	}
 }
 
 WorkerList* reverse(WorkerList* head)
@@ -293,6 +286,7 @@ WorkerList* reverse(WorkerList* head)
 	WorkerList* newhead;
 	if (x->next == NULL)
 	{
+		
 		newhead = x; //משתנה גלובלי
 		return (newhead);
 	}
@@ -307,6 +301,25 @@ void FreeWorkers(WorkerList* head)
 		return 0;
 	for (x = head; x->next != NULL; x = x->next)
 		free(x->data);
+
+}
+void PrintList(WorkerList* head)
+{
+	if (head == NULL)
+	{
+		printf("Empty list\n");
+		return 0;
+	}
+	WorkerList* ptt = head;
+	while (ptt != NULL)
+	{
+		if (LOWYEAR < &(ptt->data->StartWork)&& &(ptt->data->StartWork)<HIGHYEAR)
+			PrintWorker('0', ptt->data);
+		else
+			PrintWorker('1', ptt->data);
+		ptt = ptt->next;
+
+	}
 
 }
 

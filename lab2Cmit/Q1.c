@@ -1,7 +1,8 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
-#include<string.h>
+#include <string.h>
+#include <assert.h>
 #define NUM_Year '0'
 #define Char_Year '1'
 
@@ -19,6 +20,8 @@ typedef struct
 	}StartWork;
 }
 Worker;
+
+
 typedef struct WorkerList
 {
 	Worker* data;
@@ -57,7 +60,7 @@ to Print Worker enter 'P'\n, to update prcent to all Worker enter 'H' ,\n   to f
 
 			do
 			{
-				scanf("%c", &typeyear);
+					scanf("%c", &typeyear);
 
 				if (typeyear != '0' && typeyear != '1')
 					printf("tRY AGAIN\n");
@@ -67,7 +70,7 @@ to Print Worker enter 'P'\n, to update prcent to all Worker enter 'H' ,\n   to f
 			worker = CreateWorker(typeyear);
 			//	PrintWorker(typeyear, worker);
 			head = addWorker(head, worker);
-
+			break;
 
 		}
 		case'P'://הדפסת כרטיסית עובד
@@ -189,28 +192,28 @@ Worker* CreateWorker(char type)
 
 }
 
-WorkerList* addWorker(WorkerList* head, Worker* W) //מחזיר את ראש הרשימה המעודכן
+WorkerList* addWorker(WorkerList* head, Worker* Wp) //מחזיר את ראש הרשימה המעודכן
 {
-	WorkerList* newWorkerlist = (struct WorkerList*)malloc(sizeof(WorkerList));
-	if (!newWorkerlist) { puts("allocation fauild "); return head; }
-	newWorkerlist->data->payment = W->payment;
-
-	newWorkerlist->next = NULL;
-
-	if (head == NULL)//if list is empty 
-		return newWorkerlist->next = NULL;
-
+	WorkerList* newWorkerlist;
+	assert(newWorkerlist = (struct WorkerList*)malloc(sizeof(WorkerList)));	
+	newWorkerlist->data = Wp;
+	if (!head || (head->data->payment > Wp->payment)) {//if list is empty or lowest payment
+		newWorkerlist->next = head;
+		return newWorkerlist;
+	}
 	WorkerList* curr = head;
 	WorkerList* ptr = NULL;
 
-	while (curr != NULL && (curr->data->payment <= W->payment))
+	while (curr != NULL && (curr->data->payment < Wp->payment))
 	{
 		ptr = curr;
 		curr = curr->next;
 	}
 	newWorkerlist->next = curr;
-	if (ptr) ptr->next = newWorkerlist;
-	else head = newWorkerlist;
+	ptr->next = newWorkerlist;
+	
+	//if (ptr) ptr->next = newWorkerlist;
+	//else head = newWorkerlist;
 	return head;
 
 	//if ((x->data->payment) <= (newWorkerlist->data->payment))
